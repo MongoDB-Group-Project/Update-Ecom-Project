@@ -1,3 +1,4 @@
+import React from "react"
 import { Add, Remove } from "@material-ui/icons";
 import styled from "styled-components";
 import Annoucement from "../components/Annoucement";
@@ -5,7 +6,9 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import Newsletter from "../components/Newsletter";
 import { mobile } from "../Responsive";
-
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from 'axios'
 const Container = styled.div`
     
 `;
@@ -13,7 +16,7 @@ const Container = styled.div`
 const Wrapper = styled.div`
     padding: 50px;
     display: flex;
-    ${mobile({padding: "10px", flexDirection:"column"})}
+    ${mobile({ padding: "10px", flexDirection: "column" })}
 `;
 
 const ImgContainer = styled.div`
@@ -24,13 +27,13 @@ const Image = styled.img`
     width: 100%;
     height: 90vh;
     object-fit: cover;
-    ${mobile({height: "40vh"})}
+    ${mobile({ height: "40vh" })}
 `;
 
 const InfoContainer = styled.div`
     flex: 1; 
     padding: 0px 50px; 
-    ${mobile({padding: "10px"})}  
+    ${mobile({ padding: "10px" })}  
 `;
 
 const Title = styled.h1`
@@ -51,7 +54,7 @@ const FilterContainer = styled.div`
     margin: 30px 0px;
     display: flex;
     justify-content: space-between;
-    ${mobile({width: "100%"})}
+    ${mobile({ width: "100%" })}
 `;
 
 const Filter = styled.div`
@@ -69,7 +72,7 @@ const FilterColor = styled.div`
     height: 20px;
     border-radius: 50%;
     margin: 0px 5px;
-    background-color: ${props=>props.color};
+    background-color: ${props => props.color};
     cursor: pointer;
     
 `;
@@ -88,7 +91,7 @@ const AddContainer = styled.div`
     display: flex;
     align-iitems: center;
     justify-content: space-between;
-    ${mobile({width: "100%"})}
+    ${mobile({ width: "100%" })}
 `;
 
 const AmountContainer = styled.div`
@@ -121,57 +124,104 @@ const Button = styled.button`
 `;
 
 
-const Product = () => {
-  return (
-      <Container>
-          <Navbar/>
-          <Annoucement/>
-          <Wrapper>
-               <ImgContainer>
-               <Image src="https://i.ibb.co/S6qMxwr/jean.jpg"/>
-               </ImgContainer>
-               
-               <InfoContainer>
-                   <Title>Denim Jumpsuit</Title>
-                   <Desc> Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eius 
-                       nulla praesentium, quasi aliquam sunt provident quas consequuntur 
-                       veritatis quos itaque mollitia, ex quia maiores beatae inventore, 
-                       nemo minus quisquam perspiciatis.</Desc>
-                   <Price>Rs 450</Price>
 
-                   <FilterContainer>
-                     <Filter>
-                         <FilterTitle>Color</FilterTitle>
-                         <FilterColor color="black"/>
-                         <FilterColor color="darkblue"/>
-                         <FilterColor color="gray"/>
-                    </Filter> 
-                    
-                     <Filter>
-                         <FilterTitle>Size</FilterTitle>
-                         <FilterSize>
-                             <FilterSizeOption>XS</FilterSizeOption>
-                             <FilterSizeOption>S</FilterSizeOption>
-                             <FilterSizeOption>M</FilterSizeOption>
-                             <FilterSizeOption>L</FilterSizeOption>
-                             <FilterSizeOption>XL</FilterSizeOption>
-                         </FilterSize>
-                     </Filter>
-                   </FilterContainer>
-                   <AddContainer>
-                       <AmountContainer>
-                          <Remove/>
-                          <Amount>1</Amount>
-                          <Add/> 
-                       </AmountContainer> 
-                       <Button>ADD TO CART</Button>
-                   </AddContainer>
-               </InfoContainer>  
-          </Wrapper>
-          <Newsletter/>
-          <Footer/>
-      </Container>
-  );
+const Product = () => {
+    const [orderStatus, setOrderStatus] = useState(false);
+    const [user, setUser] = useState(null);
+    const [product, setProduct] = useState(null);
+    const params = useParams()
+    console.log(params);
+
+    const fetchProduct = async () => {
+        const res = await axios.get('http://localhost:5000/api/products/find/' + params.id)
+        if (res.status === 200) {
+            setProduct(res.data)
+            console.log(res.data.color)
+        }
+        else {
+            console.log(res)
+        }
+    }
+    const handleOrder = async () => {
+        if (!user) {
+            console.log("please sign in")
+        }
+        const resp = await axios.post("http://localhost:5000/api/orders", {
+            userId: user._id,
+            products: [
+                {
+                    "productId": product._id,
+                    "quantity": 1
+                }
+            ],
+            amount: product.price,
+            address: "IND"
+
+        })
+
+        if (resp.status === 200) {
+            console.log(resp)
+            setOrderStatus(true)
+        }
+
+
+
+    }
+
+    useEffect(() => {
+        fetchProduct()
+        setUser(JSON.parse(localStorage.getItem("user")))
+
+    }, [params])
+
+    const productRender = product ? <Container>
+        <Navbar />
+        <Annoucement />
+        <Wrapper>
+            <ImgContainer>
+                <Image src={product.img} />
+            </ImgContainer>
+
+            <InfoContainer>
+                <Title>{product.title}</Title>
+                <Desc>{product.desc}</Desc>
+                <Price>₹{product.price}</Price>
+
+                <FilterContainer>
+
+                    <FilterTitle>Color</FilterTitle>
+                    <Filter>
+                        <FilterColor color="black" />
+                        <FilterColor color="darkblue" />
+                        <FilterColor color="gray" />
+                    </Filter>
+
+                    <Filter>
+                        <FilterTitle>Size</FilterTitle>
+                        <FilterSize>
+                            <FilterSizeOption>S</FilterSizeOption>
+                            <FilterSizeOption>M</FilterSizeOption>
+                            <FilterSizeOption>L</FilterSizeOption>
+                            <FilterSizeOption>XL</FilterSizeOption>
+                        </FilterSize>
+                    </Filter>
+                </FilterContainer>
+                {orderStatus ? <Button onClick={() => window.location.replace("/")}>Order Successful. Browse more</Button> : <Button onClick={handleOrder}>Order Now</Button>}
+            </InfoContainer>
+        </Wrapper>
+        <Newsletter />
+        <Footer />
+    </Container> : <></>
+
+    return (
+        <div>
+            {
+                product !== null ? productRender : <Title>Loading</Title>
+            }
+
+        </div>
+
+    );
 };
 
 export default Product;

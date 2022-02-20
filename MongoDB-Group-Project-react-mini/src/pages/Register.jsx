@@ -1,6 +1,9 @@
+import axios from "axios";
+import { useState } from "react";
+import { Navigate } from "react-router-dom";
 import styled from "styled-components";
 import { mobile } from "../Responsive";
-
+import {useNavigate} from 'react-router-dom'
 const Container = styled.div`
     width: 100vw;
     height: 100vh;
@@ -54,23 +57,42 @@ const Button = styled.button`
 
 
 const Register = () => {
+    const[ formData, updateFormData]  = useState({})
+    const navigate = useNavigate()
+    const handleChange = (e) => {
+        console.log(e.target.name, e.target.value);
+        updateFormData({...formData, [e.target.name]:e.target.value})
+    }
+    
+    const handleCreate = () => {
+        axios.post("http://localhost:5000/api/auth/register", 
+        { 
+            email: formData.email, 
+            username: formData.username,
+            password: formData.password
+        }).then(res=> {
+            console.log(res)
+            navigate('/login')
+        })
+    }
   return (
       <Container>
           <Wrapper>
              <Title>CREATE AN ACCOUNT</Title> 
              <Form>
-                 <Input placeholder="First Name"/>
+                 <Input name="firstName" onChange={handleChange} placeholder="First Name"/>
                  <Input placeholder="Last Name"/>
-                 <Input placeholder="Username"/>
-                 <Input placeholder="Email"/>
-                 <Input placeholder="Password"/>
+                 <Input name="username" onChange={handleChange} placeholder="Username"/>
+                 <Input name="email" onChange={handleChange} placeholder="Email"/>
+                 <Input name="password" onChange={handleChange} placeholder="Password"/>
                  <Input placeholder="Confirm Password"/>
                  <Agreement>
                   By creating an account, I consent to the processing of my personal
                   data in accordance with the <b>PRIVACY POLICY</b>.  
                  </Agreement>
-                 <Button>CREATE</Button>
+                
              </Form>
+             <Button onClick={handleCreate}>CREATE</Button>
           </Wrapper>
       </Container>
   );

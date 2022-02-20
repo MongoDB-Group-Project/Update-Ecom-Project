@@ -4,7 +4,7 @@ import { useState } from 'react';
 import styled from 'styled-components';
 import{popularProducts} from "../data"
 import Product from './Product';
-import{ axios } from 'axios'
+import axios from 'axios'
 
 const Mongoose = require("mongoose");
 
@@ -22,8 +22,13 @@ const Products = ({cat,filters,sort}) => {
   useEffect(()=>{
       const fetchProducts = async() =>{
           try{
-            const res = await axios.get("https://localhost:5000/api/products");
-            console.log(res)
+            const res = await axios.get("http://localhost:5000/api/products");
+            if(res.status === 200){
+                console.log(res)
+                setProducts(res.data)
+
+            }
+            
           }catch(err) {
               console.log(err);
           }
@@ -33,8 +38,8 @@ const Products = ({cat,filters,sort}) => {
 
   return (
       <Container>
-          {popularProducts.map(item=>(
-             <Product item={item} key={item.id}/>
+          {products.map(item=>(
+             <Product item={item} key={item._id}/>
           ))}
       </Container>
   );

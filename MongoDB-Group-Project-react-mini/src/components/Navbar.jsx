@@ -1,9 +1,10 @@
-import { Badge } from '@material-ui/core';
+import { Badge, Button } from '@material-ui/core';
 import { Search, ShoppingCartOutlined } from '@material-ui/icons';
 import React from 'react';
 import styled from 'styled-components';
 import {mobile} from '../Responsive';
 import { Link } from 'react-router-dom'
+import { useState } from 'react';
 
 const Container = styled.div`
     padding: 10px 20px;
@@ -70,6 +71,17 @@ const MenuItem = styled.div`
 `;
 
 const Navbar = () => {
+    const [user, setUser] = useState({})
+
+    useState(()=>{
+        console.log(JSON.parse(localStorage.getItem("user")));
+        setUser(JSON.parse(localStorage.getItem("user")))
+    })
+    const handleLogout = () => {
+        localStorage.removeItem("user")
+        window.location.reload();
+    }   
+
   return(
     <Container>
         <Wrapper>
@@ -86,12 +98,16 @@ const Navbar = () => {
             </Center>
             </Link>
             <Right>
+                    {!user?(<>
+                    
                     <Link to={`/register/`}>
                     <MenuItem>REGISTER</MenuItem>
                     </Link>
                     <Link to={`/login/`}>
                     <MenuItem>SIGN IN</MenuItem>
                     </Link>
+                    </>):(<Button onClick={handleLogout}>Logout</Button>) }          
+                    
                     <Link to={`/cart/`}>
                     <MenuItem>
                         <Badge badgeContent={4} color="primary">
@@ -99,6 +115,8 @@ const Navbar = () => {
                         </Badge>
                     </MenuItem>
                     </Link>
+                    
+                    
             </Right>
         </Wrapper> 
     </Container>

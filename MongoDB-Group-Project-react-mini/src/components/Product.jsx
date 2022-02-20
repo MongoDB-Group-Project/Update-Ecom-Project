@@ -1,7 +1,7 @@
 import { FavoriteBorderOutlined, SearchOutlined, ShoppingCartOutlined } from '@material-ui/icons';
 import React from 'react';
 import styled from 'styled-components';
-
+import {useNavigate } from 'react-router-dom';
 const Container = styled.div`
     flex: 1;
     margin: 5px;
@@ -42,8 +42,10 @@ const Icon= styled.div`
 `;
 
 const Product = ({item}) => {
+  const navigate = useNavigate()
+  console.log(item)
   return (
-      <Container>
+      <Container onClick={e=>navigate('/product/'+item._id)}>
           <Image src={item.img}/>
           <Info>
               <Icon>
