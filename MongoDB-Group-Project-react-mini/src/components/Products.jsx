@@ -6,6 +6,8 @@ import{popularProducts} from "../data"
 import Product from './Product';
 import{ axios } from 'axios'
 
+const Mongoose = require("mongoose");
+
 const Container = styled.div`
     padding: 20px;
     display: flex;
